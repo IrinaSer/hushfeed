@@ -13,10 +13,10 @@ spec/
 
 ## Index
 
-| Spec | Title | Status |
-| --- | --- | --- |
+| Spec                              | Title        | Status   |
+| --------------------------------- | ------------ | -------- |
 | [git-workflow](./git-workflow.md) | Git workflow | Accepted |
-| [001](./001-hide-channel.md) | Hide channel | Accepted |
+| [001](./001-hide-channel.md)      | Hide channel | Accepted |
 
 ## Status lifecycle
 
