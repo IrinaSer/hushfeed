@@ -19,7 +19,7 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 ### 1. Hide a channel from the feed
 
 - On the YouTube Subscriptions feed, each video card shows a Hushfeed `Hide channel` button on hover. It is Hushfeed's own button, not an item injected into YouTube's `⋮` menu.
-- This applies to regular video cards and to cards on the Shorts shelf of the feed.
+- This applies to regular video cards. Shorts are out of scope: a Short card in the feed names no channel (see Out of scope).
 - Choosing it hides every card of that channel currently in the feed, and every card of that channel that loads later (scroll, in-app navigation, reload).
 - The user never opens extension settings, searches for a channel or copies a URL to hide it.
 
@@ -57,13 +57,13 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 
 ## Out of scope
 
-Snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; categories; options page; import/export; statistics; onboarding screens; YouTube pages other than the Subscriptions feed; other platforms; other browsers; monetisation.
+Shorts in the Subscriptions feed: their cards link only to `/shorts/<id>` and carry no channel, so attributing them needs an extra lookup per Short (verified in slice 3; a separate spec); snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; categories; options page; import/export; statistics; onboarding screens; YouTube pages other than the Subscriptions feed; other platforms; other browsers; monetisation.
 
 ## Slices
 
 1. **Domain core.** Feed item and rule models, filter engine, rules repository interface with an in-memory implementation, unit tests. No browser code.
 2. **Storage.** `chrome.storage.local` implementation of the repository, on/off state, change notifications.
-3. **Hide on the feed.** Content script on the Subscriptions feed: detect regular and Shorts shelf cards, extract the channel, apply stored rules to current and newly loaded cards. Rules are seeded by hand at this point.
+3. **Hide on the feed.** Content script on the Subscriptions feed: detect video cards, extract the channel, apply stored rules to current and newly loaded cards. Rules are seeded by hand at this point.
 4. **Hide action and undo.** `Hide channel` on the card, the notice, `Undo`.
 5. **Popup.** On/off toggle, hidden count, hidden channels list with `Show`, empty state. Replaces the scaffold popup.
 6. **Permissions.** Narrow host permissions to YouTube.
@@ -73,7 +73,6 @@ Snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; ca
 
 - [ ] Hiding a channel from a card removes all of its cards from the Subscriptions feed.
 - [ ] Cards of a hidden channel that load on scroll are hidden.
-- [ ] Cards of a hidden channel on the Shorts shelf are hidden.
 - [ ] A hidden channel stays hidden after a reload and after in-app navigation away and back.
 - [ ] `Undo` restores the channel's cards without a reload.
 - [ ] `Show` in the popup restores the channel in an open Subscriptions tab without a reload.
