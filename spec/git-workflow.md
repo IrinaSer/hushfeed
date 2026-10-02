@@ -80,7 +80,7 @@ bump version in a PR → merge into main → tag vX.Y.Z → run "Submit to Web S
 Not yet in place; the rules above apply in full once these are done:
 
 - [x] Local branch renamed from `master` to `main`.
-- [ ] GitHub repository created and connected as `origin`.
+- [x] GitHub repository created and connected as `origin`.
 - [ ] `Protect main` ruleset configured.
 - [ ] `build` and `title` checks added as a PR workflow.
 - [ ] `SUBMIT_KEYS` secret set and the extension registered in the Chrome Web Store.
