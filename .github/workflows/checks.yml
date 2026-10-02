@@ -1,0 +1,41 @@
+name: "Checks"
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check formatting
+        run: pnpm format:check
+      - name: Check types
+        run: pnpm typecheck
+      - name: Build the extension
+        run: pnpm build
+
+  title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if ! printf '%s' "$TITLE" | grep -Eq '^(feat|fix|style|refactor|docs|chore): [a-z0-9`].*[^.]$'; then
+            echo "PR title \"$TITLE\" does not follow the commit convention in spec/git-workflow.md:"
+            echo "<type>: <summary>, type one of feat|fix|style|refactor|docs|chore, lowercase, no trailing period."
+            exit 1
+          fi

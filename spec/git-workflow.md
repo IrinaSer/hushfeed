@@ -40,14 +40,14 @@ The `Protect main` ruleset (repository settings → Rules) enforces the rules ab
 
 Close to [Conventional Commits](https://www.conventionalcommits.org/): `<type>: <summary>`, imperative mood, lowercase, no trailing period.
 
-| Type | Use for |
-| --- | --- |
-| `feat` | user-visible functionality |
-| `fix` | bug fixes |
-| `style` | visual refinements without behaviour changes |
-| `refactor` | code restructuring without behaviour changes |
-| `docs` | specs and documentation |
-| `chore` | tooling, configuration, CI, dependencies, releases |
+| Type       | Use for                                            |
+| ---------- | -------------------------------------------------- |
+| `feat`     | user-visible functionality                         |
+| `fix`      | bug fixes                                          |
+| `style`    | visual refinements without behaviour changes       |
+| `refactor` | code restructuring without behaviour changes       |
+| `docs`     | specs and documentation                            |
+| `chore`    | tooling, configuration, CI, dependencies, releases |
 
 Examples:
 
@@ -82,5 +82,5 @@ Not yet in place; the rules above apply in full once these are done:
 - [x] Local branch renamed from `master` to `main`.
 - [x] GitHub repository created and connected as `origin`.
 - [ ] `Protect main` ruleset configured.
-- [ ] `build` and `title` checks added as a PR workflow.
+- [x] `build` and `title` checks added as a PR workflow.
 - [ ] `SUBMIT_KEYS` secret set and the extension registered in the Chrome Web Store.
