@@ -191,6 +191,9 @@ importers:
       '@types/react-dom':
         specifier: 18.2.18
         version: 18.2.18
+      happy-dom:
+        specifier: 20.14.5
+        version: 20.14.5
       prettier:
         specifier: 3.2.4
         version: 3.2.4
@@ -199,7 +202,7 @@ importers:
         version: 5.3.3
       vitest:
         specifier: 5.0.3
-        version: 5.0.3(@types/node@20.11.5)(vite@8.3.2(@types/node@20.11.5)(esbuild@0.18.20)(less@4.9.1(supports-color@7.2.0))(sass@1.105.1)(yaml@2.9.1))
+        version: 5.0.3(@types/node@20.11.5)(happy-dom@20.14.5)(vite@8.3.2(@types/node@20.11.5)(esbuild@0.18.20)(less@4.9.1(supports-color@7.2.0))(sass@1.105.1)(yaml@2.9.1))
 
 packages:
 
@@ -1850,6 +1853,12 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
+
+  '@types/ws@8.18.2':
+    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
+
   '@vitest/mocker@5.0.3':
     resolution: {integrity: sha512-T8sWAIbkSyAjkwTcaEc3Iu0o9A27X1/kdXrizhZkGuSKScRQtRzclfAMpOTcGdXCsqxeWlpGy3XjqaW8CpLORg==}
     peerDependencies:
@@ -1976,6 +1985,10 @@ packages:
     resolution: {integrity: sha512-1R4kiYKXGViqEN0CnoDrXc1StD9niAwu+j2dukWzrD4bJgsD4lDmEp0CRbc6E/vYJIfTHwPmwyaKtVSudICdPA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
+
+  buffer-image-size@0.6.4:
+    resolution: {integrity: sha512-nEh+kZOPY1w+gcCMobZ6ETUp9WfibndnosbpwB1iJk/8Gt5ZF2bhS6+B6bPYz424KtwsR6Rflc3tCz1/ghX2dQ==}
+    engines: {node: '>=4.0'}
 
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
@@ -2232,6 +2245,10 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
+  entities@7.0.1:
+    resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
+    engines: {node: '>=0.12'}
+
   env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
@@ -2365,6 +2382,10 @@ packages:
   graphql@15.10.3:
     resolution: {integrity: sha512-e2ut+7oOFe5/jENYc+T7GZnL5lIBd7vcWg6TlqVx1L/MFXY3CKOsEcP+jMPgL8uwcfrllJRNSmqq5psZahdKZg==}
     engines: {node: '>= 10.x'}
+
+  happy-dom@20.14.5:
+    resolution: {integrity: sha512-x/RzkpWO40bTjIoT30iQtt64FLLmH/iRcUCN2X//bLx7H3ifkdfPXyqsro/OYtqzIAhiLMMA7mmiOR9C3NOKjQ==}
+    engines: {node: '>=20.0.0'}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -3434,6 +3455,10 @@ packages:
   webidl-conversions@4.0.2:
     resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}
 
+  whatwg-mimetype@3.0.0:
+    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
+    engines: {node: '>=12'}
+
   whatwg-url@7.1.0:
     resolution: {integrity: sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg==}
 
@@ -3450,6 +3475,18 @@ packages:
   wrap-ansi@6.2.0:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
     engines: {node: '>=8'}
+
+  ws@8.22.0:
+    resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
 
   xxhash-wasm@0.4.2:
     resolution: {integrity: sha512-/eyHVRJQCirEkSZ1agRSCwriMhwlyUcFkXD5TPVSLP+IPzjsqMVzZwdoczLp1SoQU0R3dxz1RpIK+4YNQbCVOA==}
@@ -5303,6 +5340,12 @@ snapshots:
 
   '@types/trusted-types@2.0.7': {}
 
+  '@types/whatwg-mimetype@3.0.2': {}
+
+  '@types/ws@8.18.2':
+    dependencies:
+      '@types/node': 20.11.5
+
   '@vitest/mocker@5.0.3(vite@8.3.2(@types/node@20.11.5)(esbuild@0.18.20)(less@4.9.1(supports-color@7.2.0))(sass@1.105.1)(yaml@2.9.1))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -5438,6 +5481,10 @@ snapshots:
       electron-to-chromium: 1.5.443
       node-releases: 2.0.57
       update-browserslist-db: 1.3.3(browserslist@4.29.3)
+
+  buffer-image-size@0.6.4:
+    dependencies:
+      '@types/node': 20.11.5
 
   buffer@6.0.3:
     dependencies:
@@ -5684,6 +5731,8 @@ snapshots:
 
   entities@4.5.0: {}
 
+  entities@7.0.1: {}
+
   env-paths@2.2.1: {}
 
   errno@0.1.8:
@@ -5854,6 +5903,19 @@ snapshots:
       graphql: 15.10.3
 
   graphql@15.10.3: {}
+
+  happy-dom@20.14.5:
+    dependencies:
+      '@types/node': 20.11.5
+      '@types/whatwg-mimetype': 3.0.2
+      '@types/ws': 8.18.2
+      buffer-image-size: 0.6.4
+      entities: 7.0.1
+      whatwg-mimetype: 3.0.0
+      ws: 8.22.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   has-flag@4.0.0: {}
 
@@ -6832,7 +6894,7 @@ snapshots:
       sass: 1.105.1
       yaml: 2.9.1
 
-  vitest@5.0.3(@types/node@20.11.5)(vite@8.3.2(@types/node@20.11.5)(esbuild@0.18.20)(less@4.9.1(supports-color@7.2.0))(sass@1.105.1)(yaml@2.9.1)):
+  vitest@5.0.3(@types/node@20.11.5)(happy-dom@20.14.5)(vite@8.3.2(@types/node@20.11.5)(esbuild@0.18.20)(less@4.9.1(supports-color@7.2.0))(sass@1.105.1)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.3(vite@8.3.2(@types/node@20.11.5)(esbuild@0.18.20)(less@4.9.1(supports-color@7.2.0))(sass@1.105.1)(yaml@2.9.1))
@@ -6850,6 +6912,7 @@ snapshots:
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 20.11.5
+      happy-dom: 20.14.5
     transitivePeerDependencies:
       - msw
 
@@ -6864,6 +6927,8 @@ snapshots:
   weak-lru-cache@1.2.2: {}
 
   webidl-conversions@4.0.2: {}
+
+  whatwg-mimetype@3.0.0: {}
 
   whatwg-url@7.1.0:
     dependencies:
@@ -6882,6 +6947,8 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+
+  ws@8.22.0: {}
 
   xxhash-wasm@0.4.2: {}
 
