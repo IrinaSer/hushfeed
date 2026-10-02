@@ -3,7 +3,7 @@
   "displayName": "Hushfeed",
   "version": "0.0.1",
   "description": "Your feed, just quieter.",
-  "author": "Plasmo Corp. <foss@plasmo.com>",
+  "author": "Silverina",
   "packageManager": "pnpm@12.8.1",
   "scripts": {
     "dev": "plasmo dev",
