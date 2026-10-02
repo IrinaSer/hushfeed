@@ -1,6 +1,6 @@
 # 001 — Hide channel
 
-**Status:** Draft
+**Status:** Accepted
 
 ## Why
 
@@ -18,7 +18,8 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 
 ### 1. Hide a channel from the feed
 
-- On the YouTube Subscriptions feed, each video card offers a `Hide channel` action.
+- On the YouTube Subscriptions feed, each video card shows a Hushfeed `Hide channel` button on hover. It is Hushfeed's own button, not an item injected into YouTube's `⋮` menu.
+- This applies to regular video cards and to cards on the Shorts shelf of the feed.
 - Choosing it hides every card of that channel currently in the feed, and every card of that channel that loads later (scroll, in-app navigation, reload).
 - The user never opens extension settings, searches for a channel or copies a URL to hide it.
 
@@ -31,7 +32,7 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 
 - Shows whether filtering is on, and a toggle to turn it on or off.
 - Shows how many channels are hidden.
-- Lists hidden channels by name, each with a `Show` action that removes the rule.
+- Lists all hidden channels by name, scrollable when long, each with a `Show` action that removes the rule.
 - With no hidden channels, shows an empty state that says how to hide one.
 
 ### 4. Global on/off
@@ -49,7 +50,9 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 - **Storage sits behind a repository interface.** The rest of the code does not call `chrome.storage` directly.
 - **No per-card storage lookups.** Rules are cached in the content script and refreshed when storage changes.
 - **Feed observation does not rescan.** New cards are processed once as they appear; the whole feed is not re-queried on every DOM mutation.
-- **pnpm is the package manager.** `pnpm-lock.yaml` is the only lockfile.
+- **Channel identity.** A rule is keyed by the channel ID (`UC…`) when the card exposes it, otherwise by the handle (`/@handle`). Which one the feed cards actually expose is verified on the live page in slice 3 and recorded here.
+- **Toolchain.** Plasmo (React, MV3), as scaffolded. pnpm is the package manager; `pnpm-lock.yaml` is the only lockfile.
+- **Tests.** Unit and integration tests run on Vitest. End-to-end tests run on Playwright against the built extension and real YouTube. The Subscriptions feed needs a signed-in account, so they run locally under a dedicated test account in a persistent Playwright browser profile that is never committed. They are not part of the required `build` check, since CI cannot sign in.
 - **Hiding is not destructive.** Cards are hidden, not removed from the DOM, so that undo and toggle-off work without a reload.
 
 ## Out of scope
@@ -60,15 +63,17 @@ Snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; ca
 
 1. **Domain core.** Feed item and rule models, filter engine, rules repository interface with an in-memory implementation, unit tests. No browser code.
 2. **Storage.** `chrome.storage.local` implementation of the repository, on/off state, change notifications.
-3. **Hide on the feed.** Content script on the Subscriptions feed: detect cards, extract the channel, apply stored rules to current and newly loaded cards. Rules are seeded by hand at this point.
+3. **Hide on the feed.** Content script on the Subscriptions feed: detect regular and Shorts shelf cards, extract the channel, apply stored rules to current and newly loaded cards. Rules are seeded by hand at this point.
 4. **Hide action and undo.** `Hide channel` on the card, the notice, `Undo`.
 5. **Popup.** On/off toggle, hidden count, hidden channels list with `Show`, empty state. Replaces the scaffold popup.
-6. **Permissions and metadata.** Narrow host permissions, fix `author` in `package.json`.
+6. **Permissions.** Narrow host permissions to YouTube.
+7. **End-to-end tests.** Playwright scenarios: hide → reload → still hidden; hide → undo → visible again.
 
 ## Acceptance criteria
 
 - [ ] Hiding a channel from a card removes all of its cards from the Subscriptions feed.
 - [ ] Cards of a hidden channel that load on scroll are hidden.
+- [ ] Cards of a hidden channel on the Shorts shelf are hidden.
 - [ ] A hidden channel stays hidden after a reload and after in-app navigation away and back.
 - [ ] `Undo` restores the channel's cards without a reload.
 - [ ] `Show` in the popup restores the channel in an open Subscriptions tab without a reload.
@@ -76,12 +81,4 @@ Snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; ca
 - [ ] Cards of channels without a rule are never hidden.
 - [ ] The filter engine has unit tests for: hidden channel, unrelated channel, filtering off.
 - [ ] The manifest requests no host access beyond YouTube.
-
-## Open questions
-
-1. **Where does `Hide channel` live?** Injected into YouTube's own `⋮` card menu, or a Hushfeed button of its own on the card (e.g. shown on hover)? The native menu is the more natural place but is the most fragile against YouTube markup changes.
-2. **Channel identity.** Rules should be keyed by the stable channel ID (`UC…`). Feed cards may expose only the handle link (`/@handle`). To be verified on the live page in slice 3; if only the handle is available, do we key by handle?
-3. **Shorts shelf.** The Subscriptions feed has a separate Shorts shelf. Does hiding a channel hide its Shorts there too, or only regular video cards in v0.1?
-4. **Toolchain.** The repo is scaffolded with Plasmo (React, MV3). Stay on Plasmo, or move to plain Vite?
-5. **Tests.** Vitest for unit tests? Is an E2E test against live YouTube in scope for 001, or a later spec?
-6. **Popup list.** All hidden channels, or only the most recent ones with a link to a full list (which would need the out-of-scope options page)?
+- [ ] The end-to-end scenarios of slice 7 pass.

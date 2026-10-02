@@ -16,7 +16,7 @@ spec/
 | Spec | Title | Status |
 | --- | --- | --- |
 | [git-workflow](./git-workflow.md) | Git workflow | Accepted |
-| [001](./001-hide-channel.md) | Hide channel | Draft |
+| [001](./001-hide-channel.md) | Hide channel | Accepted |
 
 ## Status lifecycle
 
