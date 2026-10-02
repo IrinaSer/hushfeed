@@ -11,7 +11,8 @@
     "package": "plasmo package",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "plasmo": "0.90.5",
@@ -25,7 +26,8 @@
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
     "prettier": "3.2.4",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "vitest": "5.0.3"
   },
   "manifest": {
     "host_permissions": [

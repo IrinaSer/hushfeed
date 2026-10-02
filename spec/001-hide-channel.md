@@ -1,6 +1,6 @@
 # 001 — Hide channel
 
-**Status:** Accepted
+**Status:** In progress
 
 ## Why
 
