@@ -19,7 +19,7 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 ### 1. Hide a channel from the feed
 
 - On the YouTube Subscriptions feed, each video card shows a Hushfeed `Hide channel` button on hover. It is Hushfeed's own button, not an item injected into YouTube's `⋮` menu.
-- This applies to regular video cards and to cards on the Shorts shelf of the feed.
+- This applies to regular video cards. Shorts are out of scope: a Short card in the feed names no channel (see Out of scope).
 - Choosing it hides every card of that channel currently in the feed, and every card of that channel that loads later (scroll, in-app navigation, reload).
 - The user never opens extension settings, searches for a channel or copies a URL to hide it.
 
@@ -50,20 +50,20 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 - **Storage sits behind a repository interface.** The rest of the code does not call `chrome.storage` directly.
 - **No per-card storage lookups.** Rules are cached in the content script and refreshed when storage changes.
 - **Feed observation does not rescan.** New cards are processed once as they appear; the whole feed is not re-queried on every DOM mutation.
-- **Channel identity.** A rule is keyed by the channel ID (`UC…`) when the card exposes it, otherwise by the handle (`/@handle`). Which one the feed cards actually expose is verified on the live page in slice 3 and recorded here.
+- **Channel identity.** A rule is keyed by the channel ID (`UC…`) when the card exposes it, otherwise by the handle (`/@handle`). Verified on the live feed in slice 3: a video card links to its channel as `/@handle`, or as `/channel/UC…` for channels without a handle, never both. So in practice rules are keyed by handle, and by ID only for channels without one. Handles are decoded and lowercased, since YouTube treats them case-insensitively and percent-encodes non-Latin ones.
 - **Toolchain.** Plasmo (React, MV3), as scaffolded. pnpm is the package manager; `pnpm-lock.yaml` is the only lockfile.
 - **Tests.** Unit and integration tests run on Vitest. End-to-end tests run on Playwright against the built extension and real YouTube. The Subscriptions feed needs a signed-in account, so they run locally under a dedicated test account in a persistent Playwright browser profile that is never committed. They are not part of the required `build` check, since CI cannot sign in.
 - **Hiding is not destructive.** Cards are hidden, not removed from the DOM, so that undo and toggle-off work without a reload.
 
 ## Out of scope
 
-Snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; categories; options page; import/export; statistics; onboarding screens; YouTube pages other than the Subscriptions feed; other platforms; other browsers; monetisation.
+Shorts in the Subscriptions feed: their cards link only to `/shorts/<id>` and carry no channel, so attributing them needs an extra lookup per Short (verified in slice 3; a separate spec); snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; categories; options page; import/export; statistics; onboarding screens; YouTube pages other than the Subscriptions feed; other platforms; other browsers; monetisation.
 
 ## Slices
 
 1. **Domain core.** Feed item and rule models, filter engine, rules repository interface with an in-memory implementation, unit tests. No browser code.
 2. **Storage.** `chrome.storage.local` implementation of the repository, on/off state, change notifications.
-3. **Hide on the feed.** Content script on the Subscriptions feed: detect regular and Shorts shelf cards, extract the channel, apply stored rules to current and newly loaded cards. Rules are seeded by hand at this point.
+3. **Hide on the feed.** Content script on the Subscriptions feed: detect video cards, extract the channel, apply stored rules to current and newly loaded cards. Rules are seeded by hand at this point.
 4. **Hide action and undo.** `Hide channel` on the card, the notice, `Undo`.
 5. **Popup.** On/off toggle, hidden count, hidden channels list with `Show`, empty state. Replaces the scaffold popup.
 6. **Permissions.** Narrow host permissions to YouTube.
@@ -73,7 +73,6 @@ Snooze; per-channel rules (Shorts, livestreams, duration); keyword filtering; ca
 
 - [ ] Hiding a channel from a card removes all of its cards from the Subscriptions feed.
 - [ ] Cards of a hidden channel that load on scroll are hidden.
-- [ ] Cards of a hidden channel on the Shorts shelf are hidden.
 - [ ] A hidden channel stays hidden after a reload and after in-app navigation away and back.
 - [ ] `Undo` restores the channel's cards without a reload.
 - [ ] `Show` in the popup restores the channel in an open Subscriptions tab without a reload.
