@@ -17,7 +17,15 @@ describe("hideChannelRule", () => {
     })
   })
 
-  it("rejects a channel with neither ID nor handle", () => {
-    expect(() => hideChannelRule({ name: "Channel" })).toThrow()
+  it("keys a channel known by name only by its normalised name", () => {
+    expect(hideChannelRule({ name: "  Cooking  Time " })).toEqual({
+      channelKey: "name:cooking time",
+      channelName: "  Cooking  Time ",
+      mode: "hide"
+    })
+  })
+
+  it("rejects a channel with neither ID, handle nor name", () => {
+    expect(() => hideChannelRule({ name: " " })).toThrow()
   })
 })

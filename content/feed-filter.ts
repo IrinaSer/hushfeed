@@ -1,5 +1,5 @@
 import { hideChannelRule } from "../core/channel-rule"
-import { channelKeys } from "../core/feed-item"
+import { itemIdentity } from "../core/feed-item"
 import {
   createFilterEngine,
   type FilterEngine,
@@ -98,9 +98,7 @@ export async function startFeedFilter({
       } else {
         removeHideButton(anchor)
       }
-      const signature = [version, item.id, ...channelKeys(item.channel)].join(
-        "|"
-      )
+      const signature = `${version}|${itemIdentity(item)}`
       if (evaluated.get(card) === signature) {
         continue
       }
