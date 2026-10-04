@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { ChannelRule } from "../core/channel-rule"
 import { InMemoryRulesRepository } from "../core/rules-repository"
@@ -7,6 +7,8 @@ import { InMemorySettingsRepository } from "../core/settings-repository"
 import { isCardHidden } from "./card-visibility"
 import { card, fakePlatform, flush } from "./fake-platform"
 import { startFeedFilter } from "./feed-filter"
+import { findHideButton } from "./hide-button"
+import { findNotice } from "./notice"
 
 const hideA: ChannelRule = { channelKey: "@a", channelName: "A", mode: "hide" }
 
@@ -27,6 +29,8 @@ describe("startFeedFilter", () => {
     stop?.()
     stop = undefined
     root.remove()
+    document.querySelector("hushfeed-notice")?.remove()
+    vi.restoreAllMocks()
   })
 
   async function start() {
@@ -160,5 +164,109 @@ describe("startFeedFilter", () => {
 
     expect(hidden()).toEqual([])
     expect(document.getElementById("hushfeed-style")).toBeNull()
+  })
+
+  describe("hide action", () => {
+    function cardOf(video: string): Element {
+      return root.querySelector(`[data-video="${video}"]`)!
+    }
+
+    it("offers Hide channel on cards that name a channel", async () => {
+      root.innerHTML = card("v1", "@a") + card("v2")
+      await start()
+
+      expect(findHideButton(cardOf("v1"))).not.toBeNull()
+      expect(findHideButton(cardOf("v2"))).toBeNull()
+    })
+
+    it("hides every card of the channel and offers undo", async () => {
+      root.innerHTML = card("v1", "@a") + card("v2", "@b") + card("v3", "@a")
+      await start()
+
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      expect(hidden()).toEqual(["v1", "v3"])
+      expect(await rules.getRules()).toEqual([
+        { channelKey: "@a", channelName: "@a", mode: "hide" }
+      ])
+      expect(findNotice(document)?.message).toBe("Channel hidden")
+    })
+
+    it("brings the channel back on undo without a reload", async () => {
+      root.innerHTML = card("v1", "@a") + card("v2", "@a")
+      await start()
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      findNotice(document)!.action.click()
+      await flush()
+
+      expect(hidden()).toEqual([])
+      expect(await rules.getRules()).toEqual([])
+      expect(findNotice(document)).toBeNull()
+    })
+
+    it("hides the channel the card shows at the time of the click", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+      const element = cardOf("v1")
+      element.setAttribute("data-video", "v2")
+      element.setAttribute("data-channel", "@b")
+      await flush()
+
+      findHideButton(element)!.click()
+      await flush()
+
+      expect((await rules.getRules()).map((rule) => rule.channelKey)).toEqual([
+        "@b"
+      ])
+    })
+
+    it("adds the button back when the platform re-renders the card", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+
+      cardOf("v1").querySelector("hushfeed-hide-button")!.remove()
+      await flush()
+
+      expect(findHideButton(cardOf("v1"))).not.toBeNull()
+    })
+
+    it("does not offer the action while filtering is off", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+
+      await settings.setEnabled(false)
+      expect(findHideButton(cardOf("v1"))).toBeNull()
+
+      await settings.setEnabled(true)
+      expect(findHideButton(cardOf("v1"))).not.toBeNull()
+    })
+
+    it("does not show the notice when saving the rule fails", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+      const error = vi.spyOn(console, "error").mockImplementation(() => {})
+      vi.spyOn(rules, "saveRule").mockRejectedValueOnce(new Error("quota"))
+
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      expect(findNotice(document)).toBeNull()
+      expect(hidden()).toEqual([])
+      expect(error).toHaveBeenCalled()
+      error.mockRestore()
+    })
+
+    it("removes its buttons when stopped", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+
+      stop!()
+      stop = undefined
+
+      expect(findHideButton(cardOf("v1"))).toBeNull()
+    })
   })
 })

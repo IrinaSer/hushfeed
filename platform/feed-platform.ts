@@ -16,6 +16,12 @@ export interface FeedPlatform {
    */
   parseCard(card: Element): FeedItem | null
   /**
+   * The element inside a card that Hushfeed's own controls are added to. It
+   * should cover the card's thumbnail, whose top-right corner holds the
+   * `Hide channel` button.
+   */
+  actionAnchor(card: Element): Element
+  /**
    * Attributes whose change means a card now shows a different item, e.g.
    * when the platform reuses a card element for another video.
    */

@@ -27,6 +27,9 @@ export const fakePlatform: FeedPlatform & { parsed: number } = {
       channel: { handle, name: card.getAttribute("data-name") ?? handle }
     }
   },
+  actionAnchor(card) {
+    return card
+  },
   watchedAttributes: ["data-video", "data-channel"]
 }
 

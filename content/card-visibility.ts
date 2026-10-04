@@ -1,17 +1,36 @@
 const HIDDEN_ATTRIBUTE = "data-hushfeed-hidden"
 const STYLE_ID = "hushfeed-style"
 
+export const ANCHOR_ATTRIBUTE = "data-hushfeed-anchor"
+export const HIDE_BUTTON_TAG = "hushfeed-hide-button"
+
 /**
- * Adds the stylesheet that hides marked cards. Cards stay in the DOM, so
- * showing them again needs no reload.
+ * Page-level styles: hiding marked cards, and placing the `Hide channel`
+ * button in the top-right corner of its card, shown on hover or keyboard
+ * focus. Cards stay in the DOM, so showing them again needs no reload.
  */
-export function installCardStyle(document: Document): () => void {
+const PAGE_STYLE = `
+[${HIDDEN_ATTRIBUTE}] { display: none !important; }
+[${ANCHOR_ATTRIBUTE}] { position: relative; }
+${HIDE_BUTTON_TAG} {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+[${ANCHOR_ATTRIBUTE}]:hover > ${HIDE_BUTTON_TAG},
+${HIDE_BUTTON_TAG}:focus-within { opacity: 1; }
+`
+
+export function installPageStyle(document: Document): () => void {
   if (document.getElementById(STYLE_ID) !== null) {
     return () => undefined
   }
   const style = document.createElement("style")
   style.id = STYLE_ID
-  style.textContent = `[${HIDDEN_ATTRIBUTE}] { display: none !important; }`
+  style.textContent = PAGE_STYLE
   ;(document.head ?? document.documentElement).append(style)
   return () => style.remove()
 }

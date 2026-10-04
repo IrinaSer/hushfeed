@@ -1,3 +1,4 @@
+import { hideChannelRule } from "../core/channel-rule"
 import { channelKeys } from "../core/feed-item"
 import {
   createFilterEngine,
@@ -8,11 +9,17 @@ import type { RulesRepository } from "../core/rules-repository"
 import type { SettingsRepository } from "../core/settings-repository"
 import type { FeedPlatform } from "../platform/feed-platform"
 import {
-  installCardStyle,
+  installPageStyle,
   setCardHidden,
   showAllCards
 } from "./card-visibility"
 import { observeFeed } from "./feed-observer"
+import {
+  ensureHideButton,
+  removeAllHideButtons,
+  removeHideButton
+} from "./hide-button"
+import { showNotice } from "./notice"
 
 export interface FeedFilterOptions {
   root: Element
@@ -24,7 +31,8 @@ export interface FeedFilterOptions {
 /**
  * Keeps the feed in `root` in line with the stored rules: hides cards as they
  * load, and re-applies the rules to the cards on the page whenever the rules
- * or the on/off switch change.
+ * or the on/off switch change. While filtering is on, every card the platform
+ * can attribute to a channel gets a `Hide channel` button.
  *
  * Storage is read once at start and then only through change notifications;
  * evaluating a card never touches storage.
@@ -44,14 +52,49 @@ export async function startFeedFilter({
   /** What each card was last evaluated as: state version + item identity. */
   const evaluated = new WeakMap<Element, string>()
 
+  const document = root.ownerDocument
+
+  const hideChannelOf = async (card: Element) => {
+    // Read the card again: the platform may have reused it since it was
+    // last evaluated.
+    const item = platform.parseCard(card)
+    if (item === null) {
+      return
+    }
+    const rule = hideChannelRule(item.channel)
+    try {
+      await rulesRepository.saveRule(rule)
+    } catch (error) {
+      console.error("Hushfeed: could not hide the channel", error)
+      return
+    }
+    showNotice(document, {
+      message: "Channel hidden",
+      actionLabel: "Undo",
+      onAction: () => {
+        rulesRepository.deleteRule(rule.channelKey).catch((error: unknown) => {
+          console.error("Hushfeed: could not undo hiding the channel", error)
+        })
+      }
+    })
+  }
+
   const apply = (cards: Iterable<Element>) => {
-    if (engine === undefined) {
+    if (engine === undefined || state === undefined) {
       return
     }
     for (const card of cards) {
       const item = platform.parseCard(card)
       if (item === null) {
         continue
+      }
+      // Before the signature check: the platform may re-render a card and
+      // drop the button without changing what the card shows.
+      const anchor = platform.actionAnchor(card)
+      if (state.enabled) {
+        ensureHideButton(anchor, () => void hideChannelOf(card))
+      } else {
+        removeHideButton(anchor)
       }
       const signature = [version, item.id, ...channelKeys(item.channel)].join(
         "|"
@@ -90,7 +133,7 @@ export async function startFeedFilter({
   state = { enabled, rules, ...early }
   engine = createFilterEngine(state)
 
-  const removeStyle = installCardStyle(root.ownerDocument)
+  const removeStyle = installPageStyle(document)
   const stopObserving = observeFeed({ root, platform, onCards: apply })
 
   return () => {
@@ -98,6 +141,7 @@ export async function startFeedFilter({
     unsubscribeRules()
     unsubscribeSettings()
     showAllCards(root)
+    removeAllHideButtons(root)
     removeStyle()
   }
 }
