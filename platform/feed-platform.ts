@@ -26,4 +26,16 @@ export interface FeedPlatform {
    * when the platform reuses a card element for another video.
    */
   watchedAttributes: string[]
+  /**
+   * Optional fix-ups for the platform's layout, for when hiding cards breaks
+   * it. Created once per feed root.
+   */
+  createLayout?(root: Element): FeedLayout
+}
+
+export interface FeedLayout {
+  /** Called after card visibility may have changed. */
+  update(isHidden: (card: Element) => boolean): void
+  /** Undoes every change the layout made. */
+  dispose(): void
 }

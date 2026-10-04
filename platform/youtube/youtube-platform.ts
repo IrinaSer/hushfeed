@@ -1,5 +1,6 @@
 import type { ChannelRef, FeedItem } from "../../core/feed-item"
 import type { FeedPlatform } from "../feed-platform"
+import { createYouTubeGridLayout } from "./youtube-grid-layout"
 
 /**
  * YouTube markup, verified on the Subscriptions feed (October 2026):
@@ -42,7 +43,9 @@ export const youtubePlatform: FeedPlatform = {
     return card.querySelector(":scope > #content") ?? card
   },
 
-  watchedAttributes: ["href"]
+  watchedAttributes: ["href"],
+
+  createLayout: createYouTubeGridLayout
 }
 
 export function parseVideoId(href: string): string | null {
