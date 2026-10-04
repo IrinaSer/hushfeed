@@ -85,6 +85,30 @@ describe("observeFeed", () => {
     expect(onCards).not.toHaveBeenCalled()
   })
 
+  it("does not search a container whose attribute changed", async () => {
+    root.innerHTML = `<section>${card("v1", "@a")}${card("v2", "@b")}</section>`
+    const onCards = vi.fn()
+    stop = observeFeed({ root, platform: fakePlatform, onCards })
+    onCards.mockClear()
+
+    root.querySelector("section")!.setAttribute("data-video", "x")
+    await flush()
+
+    expect(onCards).not.toHaveBeenCalled()
+  })
+
+  it("reports a card when a node inside it is removed", async () => {
+    root.innerHTML = card("v1", "@a")
+    const onCards = vi.fn()
+    stop = observeFeed({ root, platform: fakePlatform, onCards })
+    onCards.mockClear()
+
+    root.querySelector("span")!.remove()
+    await flush()
+
+    expect(videosOf(onCards.mock.calls[0][0])).toEqual(["v1"])
+  })
+
   it("stops reporting after it is stopped", async () => {
     const onCards = vi.fn()
     stop = observeFeed({ root, platform: fakePlatform, onCards })

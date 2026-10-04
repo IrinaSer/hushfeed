@@ -38,6 +38,10 @@ export const youtubePlatform: FeedPlatform = {
     return id !== null && channel !== null ? { id, channel } : null
   },
 
+  actionAnchor(card) {
+    return card.querySelector(":scope > #content") ?? card
+  },
+
   watchedAttributes: ["href"]
 }
 
