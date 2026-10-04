@@ -10,6 +10,7 @@ import type { SettingsRepository } from "../core/settings-repository"
 import type { FeedPlatform } from "../platform/feed-platform"
 import {
   installPageStyle,
+  isCardHidden,
   setCardHidden,
   showAllCards
 } from "./card-visibility"
@@ -53,6 +54,7 @@ export async function startFeedFilter({
   const evaluated = new WeakMap<Element, string>()
 
   const document = root.ownerDocument
+  const layout = platform.createLayout?.(root)
 
   const hideChannelOf = async (card: Element) => {
     // Read the card again: the platform may have reused it since it was
@@ -105,6 +107,7 @@ export async function startFeedFilter({
       evaluated.set(card, signature)
       setCardHidden(card, engine.evaluate(item) === "hide")
     }
+    layout?.update(isCardHidden)
   }
 
   const update = (change: Partial<FilterState>) => {
@@ -140,6 +143,7 @@ export async function startFeedFilter({
     stopObserving()
     unsubscribeRules()
     unsubscribeSettings()
+    layout?.dispose()
     showAllCards(root)
     removeAllHideButtons(root)
     removeStyle()
