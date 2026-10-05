@@ -32,7 +32,7 @@ The `Protect main` ruleset (repository settings → Rules) enforces the rules ab
 
 - A PR references the spec and slice it implements, for example `spec/001-hide-channel.md, slice 2`.
 - The PR title follows the commit convention below; the `title` check enforces it.
-- The `build` and `title` checks must pass before a PR can be merged. `build` covers formatting, types, unit tests and the production build of the extension.
+- The `build` and `title` checks must pass before a PR can be merged. `build` covers formatting, types, unit tests, the production build of the extension and the permissions its manifest requests.
 - PRs are squash-merged, the only merge method the ruleset allows, so `main` keeps one commit per change and the PR title becomes that commit.
 - The branch is deleted after merge.
 

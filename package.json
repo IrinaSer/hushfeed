@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:manifest": "node scripts/check-manifest.mjs"
   },
   "dependencies": {
     "plasmo": "0.90.5",
@@ -35,9 +36,6 @@
   "manifest": {
     "permissions": [
       "storage"
-    ],
-    "host_permissions": [
-      "https://*/*"
     ]
   }
 }

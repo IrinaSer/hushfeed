@@ -27,6 +27,8 @@ jobs:
         run: pnpm test
       - name: Build the extension
         run: pnpm build
+      - name: Check manifest permissions
+        run: pnpm check:manifest
 
   title:
     if: github.event_name == 'pull_request'
