@@ -15,12 +15,12 @@ import {
   showAllCards
 } from "./card-visibility"
 import { observeFeed } from "./feed-observer"
+import { showPlaceholder } from "./hidden-placeholder"
 import {
   ensureHideButton,
   removeAllHideButtons,
   removeHideButton
 } from "./hide-button"
-import { showNotice } from "./notice"
 
 export interface FeedFilterOptions {
   root: Element
@@ -34,6 +34,10 @@ export interface FeedFilterOptions {
  * load, and re-applies the rules to the cards on the page whenever the rules
  * or the on/off switch change. While filtering is on, every card the platform
  * can attribute to a channel gets a `Hide channel` button.
+ *
+ * Hiding a channel hides its cards at once, except the one clicked: that one
+ * shows an undo placeholder until it expires, so the undo is where the user
+ * is looking.
  *
  * Storage is read once at start and then only through change notifications;
  * evaluating a card never touches storage.
@@ -56,6 +60,29 @@ export async function startFeedFilter({
   const document = root.ownerDocument
   const layout = platform.createLayout?.(root)
 
+  /** The card showing the undo placeholder, if any. */
+  let placeholder: {
+    card: Element
+    /** What the card showed when clicked; a reused card drops the placeholder. */
+    identity: string
+    channelKey: string
+    /** Whether the rule is stored, so its absence means it was removed. */
+    saved: boolean
+    remove: () => void
+  } | null = null
+
+  /** Forgets the placeholder; its card is evaluated afresh by the caller. */
+  const dropPlaceholder = (): Element | null => {
+    if (placeholder === null) {
+      return null
+    }
+    const { card, remove } = placeholder
+    placeholder = null
+    remove()
+    evaluated.delete(card)
+    return card
+  }
+
   const hideChannelOf = async (card: Element) => {
     // Read the card again: the platform may have reused it since it was
     // last evaluated.
@@ -64,21 +91,53 @@ export async function startFeedFilter({
       return
     }
     const rule = hideChannelRule(item.channel)
+    const previous = dropPlaceholder()
+    if (previous !== null) {
+      apply([previous])
+    }
+
+    const anchor = platform.actionAnchor(card)
+    removeHideButton(anchor)
+    const current = {
+      card,
+      identity: itemIdentity(item),
+      channelKey: rule.channelKey,
+      saved: false,
+      remove: showPlaceholder(anchor, {
+        message: `${rule.channelName} hidden`,
+        actionLabel: "Undo",
+        onAction: () => {
+          dropPlaceholder()
+          rulesRepository
+            .deleteRule(rule.channelKey)
+            .catch((error: unknown) => {
+              console.error(
+                "Hushfeed: could not undo hiding the channel",
+                error
+              )
+              apply([card])
+            })
+        },
+        onExpire: () => {
+          if (placeholder === current) {
+            apply([dropPlaceholder()!])
+          }
+        }
+      })
+    }
+    // Set before saving: the save notifies synchronously in some storages,
+    // and the clicked card must not be hidden under the placeholder.
+    placeholder = current
+
     try {
       await rulesRepository.saveRule(rule)
+      current.saved = true
     } catch (error) {
       console.error("Hushfeed: could not hide the channel", error)
-      return
-    }
-    showNotice(document, {
-      message: "Channel hidden",
-      actionLabel: "Undo",
-      onAction: () => {
-        rulesRepository.deleteRule(rule.channelKey).catch((error: unknown) => {
-          console.error("Hushfeed: could not undo hiding the channel", error)
-        })
+      if (placeholder === current) {
+        apply([dropPlaceholder()!])
       }
-    })
+    }
   }
 
   const apply = (cards: Iterable<Element>) => {
@@ -89,6 +148,13 @@ export async function startFeedFilter({
       const item = platform.parseCard(card)
       if (item === null) {
         continue
+      }
+      if (placeholder?.card === card) {
+        if (state.enabled && itemIdentity(item) === placeholder.identity) {
+          setCardHidden(card, false)
+          continue
+        }
+        dropPlaceholder()
       }
       // Before the signature check: the platform may re-render a card and
       // drop the button without changing what the card shows.
@@ -116,6 +182,15 @@ export async function startFeedFilter({
     state = { ...state, ...change }
     engine = createFilterEngine(state)
     version += 1
+    const current = placeholder
+    if (
+      current !== null &&
+      (!state.enabled ||
+        (current.saved &&
+          !state.rules.some((rule) => rule.channelKey === current.channelKey)))
+    ) {
+      dropPlaceholder()
+    }
     apply(platform.findCards(root))
   }
 
@@ -142,6 +217,7 @@ export async function startFeedFilter({
     unsubscribeRules()
     unsubscribeSettings()
     layout?.dispose()
+    dropPlaceholder()
     showAllCards(root)
     removeAllHideButtons(root)
     removeStyle()
