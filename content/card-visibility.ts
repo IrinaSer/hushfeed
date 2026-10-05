@@ -3,11 +3,13 @@ const STYLE_ID = "hushfeed-style"
 
 export const ANCHOR_ATTRIBUTE = "data-hushfeed-anchor"
 export const HIDE_BUTTON_TAG = "hushfeed-hide-button"
+export const PLACEHOLDER_TAG = "hushfeed-placeholder"
 
 /**
- * Page-level styles: hiding marked cards, and placing the `Hide channel`
- * button in the top-right corner of its card, shown on hover or keyboard
- * focus. Cards stay in the DOM, so showing them again needs no reload.
+ * Page-level styles: hiding marked cards, placing the `Hide channel` button
+ * in the top-right corner of its card (shown on hover or keyboard focus), and
+ * laying the undo placeholder over a whole card. Cards stay in the DOM, so
+ * showing them again needs no reload.
  */
 const PAGE_STYLE = `
 [${HIDDEN_ATTRIBUTE}] { display: none !important; }
@@ -22,6 +24,11 @@ ${HIDE_BUTTON_TAG} {
 }
 [${ANCHOR_ATTRIBUTE}]:hover > ${HIDE_BUTTON_TAG},
 ${HIDE_BUTTON_TAG}:focus-within { opacity: 1; }
+${PLACEHOLDER_TAG} {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+}
 `
 
 export function installPageStyle(document: Document): () => void {
