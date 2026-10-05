@@ -37,6 +37,41 @@ function videoCard(videoId: string, channelHref: string, channelName: string) {
     </ytd-rich-item-renderer>`
 }
 
+function collabCard(videoId: string, names: string[]) {
+  const nameSpans = names
+    .map(
+      (name) =>
+        `<span class="ytContentMetadataViewModelMetadataText" role="text">${name}</span><span aria-hidden="true" class="ytContentMetadataViewModelDelimiter"></span>`
+    )
+    .join("")
+  return `
+    <ytd-rich-item-renderer>
+      <div id="content">
+        <yt-lockup-view-model>
+          <div class="ytLockupViewModelHost content-id-${videoId}">
+            <a href="/watch?v=${videoId}" class="ytLockupViewModelContentImage"></a>
+            <div class="ytLockupViewModelMetadata">
+              <yt-lockup-metadata-view-model>
+                <div class="ytLockupMetadataViewModelAvatar">
+                  <yt-avatar-stack-view-model role="button" aria-label="Каналы соавторов"></yt-avatar-stack-view-model>
+                </div>
+                <h3><a href="/watch?v=${videoId}"><span>Video title</span></a></h3>
+                <yt-content-metadata-view-model>
+                  <div class="ytContentMetadataViewModelMetadataRow" role="group">
+                    ${nameSpans}
+                    <span class="ytIconWrapperHost" aria-label="Подтверждено"></span>
+                    <span class="ytContentMetadataViewModelMetadataText" aria-label="1,2 тысячи просмотров" role="text">1,2 тыс.</span>
+                    <span class="ytContentMetadataViewModelMetadataText" aria-label="37 минут назад" role="text">37 мин. назад</span>
+                  </div>
+                </yt-content-metadata-view-model>
+              </yt-lockup-metadata-view-model>
+            </div>
+          </div>
+        </yt-lockup-view-model>
+      </div>
+    </ytd-rich-item-renderer>`
+}
+
 function shortCard(videoId: string) {
   return `
     <ytd-rich-item-renderer>
@@ -98,6 +133,44 @@ describe("youtubePlatform", () => {
       id: "aaaaaaaaaaa",
       channel: { id: "UCmKurapML4BF9Bjtj4RbvXw", name: "Two" }
     })
+  })
+
+  it("reads a collaboration card, publisher first", () => {
+    const [card] = youtubePlatform.findCards(
+      render(collabCard("ccccccccccc", ["Vsevsad 🇨🇦", "и CookingTime 🍽️"]))
+    )
+
+    expect(youtubePlatform.parseCard(card)).toEqual({
+      id: "ccccccccccc",
+      channel: { name: "Vsevsad 🇨🇦" },
+      collaborators: [{ name: "CookingTime 🍽️" }]
+    })
+  })
+
+  it("keeps multi-word names of collaborators", () => {
+    const [card] = youtubePlatform.findCards(
+      render(
+        collabCard("ccccccccccc", [
+          "Журнал «Правила жизни»",
+          "и СОЛОДНИКОВ",
+          "and Two Words"
+        ])
+      )
+    )
+
+    expect(youtubePlatform.parseCard(card)).toEqual({
+      id: "ccccccccccc",
+      channel: { name: "Журнал «Правила жизни»" },
+      collaborators: [{ name: "СОЛОДНИКОВ" }, { name: "Two Words" }]
+    })
+  })
+
+  it("does not read a collaboration card before its names are filled in", () => {
+    const [card] = youtubePlatform.findCards(
+      render(collabCard("ccccccccccc", []))
+    )
+
+    expect(youtubePlatform.parseCard(card)).toBeNull()
   })
 
   it("cannot attribute a Short to a channel", () => {

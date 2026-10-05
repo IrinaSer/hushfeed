@@ -75,7 +75,7 @@ describe("createFilterEngine", () => {
       expect(filter.evaluate(item(kurzgesagt))).toBe("hide")
     })
 
-    it("never matches by display name", () => {
+    it("does not match a channel with a handle by another channel's name", () => {
       const filter = engine([
         hideChannelRule({ handle: "@kurzgesagt", name: "Kurzgesagt" })
       ])
@@ -83,6 +83,52 @@ describe("createFilterEngine", () => {
       expect(
         filter.evaluate(item({ handle: "@someone-else", name: "Kurzgesagt" }))
       ).toBe("show")
+    })
+  })
+
+  describe("collaboration videos", () => {
+    const collab = (...names: string[]): FeedItem => ({
+      id: "collab-1",
+      channel: { name: names[0] },
+      collaborators: names.slice(1).map((name) => ({ name }))
+    })
+
+    it("hides a collaboration when its publisher is hidden by name", () => {
+      const filter = engine([hideChannelRule(kurzgesagt)])
+
+      expect(filter.evaluate(collab("Kurzgesagt", "Fireship"))).toBe("hide")
+    })
+
+    it("hides a collaboration when any collaborator is hidden", () => {
+      const filter = engine([hideChannelRule(fireship)])
+
+      expect(filter.evaluate(collab("Kurzgesagt", "Fireship"))).toBe("hide")
+    })
+
+    it("matches names regardless of case and spacing", () => {
+      const filter = engine([hideChannelRule(fireship)])
+
+      expect(filter.evaluate(collab("Someone", "  fireSHIP "))).toBe("hide")
+    })
+
+    it("shows a collaboration of channels that are not hidden", () => {
+      const filter = engine([hideChannelRule(fireship)])
+
+      expect(filter.evaluate(collab("Kurzgesagt", "Veritasium"))).toBe("show")
+    })
+
+    it("lets a rule created from a collaboration hide the channel's own videos", () => {
+      const filter = engine([hideChannelRule({ name: "Kurzgesagt" })])
+
+      expect(filter.evaluate(item(kurzgesagt))).toBe("hide")
+      expect(filter.evaluate(collab("Kurzgesagt", "Fireship"))).toBe("hide")
+      expect(filter.evaluate(item(fireship))).toBe("show")
+    })
+
+    it("shows collaborations when filtering is off", () => {
+      const filter = engine([hideChannelRule(fireship)], false)
+
+      expect(filter.evaluate(collab("Kurzgesagt", "Fireship"))).toBe("show")
     })
   })
 })
