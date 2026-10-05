@@ -75,7 +75,7 @@ Shorts in the Subscriptions feed: their cards link only to `/shorts/<id>` and ca
 - [x] Hiding a channel from a card removes all of its cards from the Subscriptions feed.
 - [x] Cards of a hidden channel that load on scroll are hidden.
 - [x] A hidden channel stays hidden after a reload and after in-app navigation away and back.
-- [ ] `Undo` restores the channel's cards without a reload.
+- [x] `Undo` restores the channel's cards without a reload.
 - [x] `Show` in the popup restores the channel in an open Subscriptions tab without a reload.
 - [x] Turning filtering off shows all cards; turning it on hides them again; rules survive both.
 - [x] Cards of channels without a rule are never hidden.
