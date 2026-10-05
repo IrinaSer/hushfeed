@@ -72,14 +72,14 @@ Shorts in the Subscriptions feed: their cards link only to `/shorts/<id>` and ca
 
 ## Acceptance criteria
 
-- [ ] Hiding a channel from a card removes all of its cards from the Subscriptions feed.
-- [ ] Cards of a hidden channel that load on scroll are hidden.
-- [ ] A hidden channel stays hidden after a reload and after in-app navigation away and back.
+- [x] Hiding a channel from a card removes all of its cards from the Subscriptions feed.
+- [x] Cards of a hidden channel that load on scroll are hidden.
+- [x] A hidden channel stays hidden after a reload and after in-app navigation away and back.
 - [ ] `Undo` restores the channel's cards without a reload.
-- [ ] `Show` in the popup restores the channel in an open Subscriptions tab without a reload.
-- [ ] Turning filtering off shows all cards; turning it on hides them again; rules survive both.
-- [ ] Cards of channels without a rule are never hidden.
-- [ ] A collaboration video is hidden when any of its channels is hidden, and offers `Hide channel` for its publisher.
-- [ ] The filter engine has unit tests for: hidden channel, unrelated channel, filtering off.
-- [ ] The manifest requests no host access beyond YouTube.
+- [x] `Show` in the popup restores the channel in an open Subscriptions tab without a reload.
+- [x] Turning filtering off shows all cards; turning it on hides them again; rules survive both.
+- [x] Cards of channels without a rule are never hidden.
+- [x] A collaboration video is hidden when any of its channels is hidden, and offers `Hide channel` for its publisher.
+- [x] The filter engine has unit tests for: hidden channel, unrelated channel, filtering off.
+- [x] The manifest requests no host access beyond YouTube.
 - [ ] The end-to-end scenarios of slice 7 pass.
