@@ -7,8 +7,8 @@ import { InMemorySettingsRepository } from "../core/settings-repository"
 import { isCardHidden } from "./card-visibility"
 import { card, fakePlatform, flush } from "./fake-platform"
 import { startFeedFilter } from "./feed-filter"
+import { findPlaceholder } from "./hidden-placeholder"
 import { findHideButton } from "./hide-button"
-import { findNotice } from "./notice"
 
 const hideA: ChannelRule = { channelKey: "@a", channelName: "A", mode: "hide" }
 
@@ -29,7 +29,7 @@ describe("startFeedFilter", () => {
     stop?.()
     stop = undefined
     root.remove()
-    document.querySelector("hushfeed-notice")?.remove()
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
@@ -179,18 +179,19 @@ describe("startFeedFilter", () => {
       expect(findHideButton(cardOf("v2"))).toBeNull()
     })
 
-    it("hides every card of the channel and offers undo", async () => {
+    it("hides the channel's other cards and puts undo in place of the clicked one", async () => {
       root.innerHTML = card("v1", "@a") + card("v2", "@b") + card("v3", "@a")
       await start()
 
       findHideButton(cardOf("v1"))!.click()
       await flush()
 
-      expect(hidden()).toEqual(["v1", "v3"])
+      expect(hidden()).toEqual(["v3"])
+      expect(findPlaceholder(cardOf("v1"))?.message).toBe("@a hidden")
+      expect(findHideButton(cardOf("v1"))).toBeNull()
       expect(await rules.getRules()).toEqual([
         { channelKey: "@a", channelName: "@a", mode: "hide" }
       ])
-      expect(findNotice(document)?.message).toBe("Channel hidden")
     })
 
     it("brings the channel back on undo without a reload", async () => {
@@ -199,12 +200,82 @@ describe("startFeedFilter", () => {
       findHideButton(cardOf("v1"))!.click()
       await flush()
 
-      findNotice(document)!.action.click()
+      findPlaceholder(cardOf("v1"))!.action.click()
       await flush()
 
       expect(hidden()).toEqual([])
       expect(await rules.getRules()).toEqual([])
-      expect(findNotice(document)).toBeNull()
+      expect(findPlaceholder(root)).toBeNull()
+      expect(findHideButton(cardOf("v1"))).not.toBeNull()
+    })
+
+    it("hides the clicked card too once the placeholder expires", async () => {
+      root.innerHTML = card("v1", "@a") + card("v2", "@a")
+      await start()
+      vi.useFakeTimers()
+      findHideButton(cardOf("v1"))!.click()
+      await vi.advanceTimersByTimeAsync(0)
+
+      await vi.advanceTimersByTimeAsync(8000)
+
+      expect(findPlaceholder(root)).toBeNull()
+      expect(hidden()).toEqual(["v1", "v2"])
+    })
+
+    it("moves the placeholder when another channel is hidden", async () => {
+      root.innerHTML = card("v1", "@a") + card("v2", "@b")
+      await start()
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      findHideButton(cardOf("v2"))!.click()
+      await flush()
+
+      expect(findPlaceholder(cardOf("v1"))).toBeNull()
+      expect(findPlaceholder(cardOf("v2"))?.message).toBe("@b hidden")
+      expect(hidden()).toEqual(["v1"])
+    })
+
+    it("drops the placeholder when the channel is shown from elsewhere", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      await rules.deleteRule("@a")
+      await flush()
+
+      expect(findPlaceholder(root)).toBeNull()
+      expect(hidden()).toEqual([])
+    })
+
+    it("drops the placeholder when filtering is turned off", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      await settings.setEnabled(false)
+      await flush()
+
+      expect(findPlaceholder(root)).toBeNull()
+      expect(hidden()).toEqual([])
+    })
+
+    it("drops the placeholder when the card is reused for another video", async () => {
+      root.innerHTML = card("v1", "@a")
+      await start()
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
+
+      const element = cardOf("v1")
+      element.setAttribute("data-video", "v9")
+      element.setAttribute("data-channel", "@b")
+      await flush()
+
+      expect(findPlaceholder(root)).toBeNull()
+      expect(hidden()).toEqual([])
+      expect(findHideButton(element)).not.toBeNull()
     })
 
     it("hides the channel the card shows at the time of the click", async () => {
@@ -244,7 +315,7 @@ describe("startFeedFilter", () => {
       expect(findHideButton(cardOf("v1"))).not.toBeNull()
     })
 
-    it("does not show the notice when saving the rule fails", async () => {
+    it("restores the card when saving the rule fails", async () => {
       root.innerHTML = card("v1", "@a")
       await start()
       const error = vi.spyOn(console, "error").mockImplementation(() => {})
@@ -253,20 +324,24 @@ describe("startFeedFilter", () => {
       findHideButton(cardOf("v1"))!.click()
       await flush()
 
-      expect(findNotice(document)).toBeNull()
+      expect(findPlaceholder(root)).toBeNull()
       expect(hidden()).toEqual([])
+      expect(findHideButton(cardOf("v1"))).not.toBeNull()
       expect(error).toHaveBeenCalled()
       error.mockRestore()
     })
 
-    it("removes its buttons when stopped", async () => {
-      root.innerHTML = card("v1", "@a")
+    it("removes its buttons and placeholder when stopped", async () => {
+      root.innerHTML = card("v1", "@a") + card("v2", "@b")
       await start()
+      findHideButton(cardOf("v1"))!.click()
+      await flush()
 
       stop!()
       stop = undefined
 
-      expect(findHideButton(cardOf("v1"))).toBeNull()
+      expect(findHideButton(cardOf("v2"))).toBeNull()
+      expect(findPlaceholder(root)).toBeNull()
     })
   })
 })

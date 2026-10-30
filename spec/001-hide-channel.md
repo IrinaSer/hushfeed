@@ -26,7 +26,8 @@ A desktop browser user subscribed to roughly 50–500 YouTube channels who uses 
 
 ### 2. Undo
 
-- Right after hiding, a notice appears on the page: `Channel hidden` with an `Undo` action.
+- Right after hiding, the card that was clicked shows `<channel name> hidden` with an `Undo` action in its place, where the user is looking; the channel's other cards are hidden at once.
+- The placeholder goes away after a few seconds, and the card is hidden with the rest. It stays while the pointer is over it. Hiding another channel moves it to that channel's card.
 - `Undo` removes the rule and brings the channel's cards back without a page reload.
 
 ### 3. Popup
